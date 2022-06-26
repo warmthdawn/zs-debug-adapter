@@ -35,6 +35,7 @@ class ZenScriptDebugAdapter() : IDebugProtocolServer {
             supportTerminateDebuggee = true
             supportsFunctionBreakpoints = false
             supportsConfigurationDoneRequest = true
+//            supportsValueFormattingOptions = true
 
             exceptionBreakpointFilters = emptyArray()
         }
@@ -167,6 +168,7 @@ class ZenScriptDebugAdapter() : IDebugProtocolServer {
     override fun disconnect(args: DisconnectArguments) = async.run {
         debuggee?.exit()
         debuggee = null
+        logger.info { "Disconnected from client" }
     }
 
 

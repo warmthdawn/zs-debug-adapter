@@ -5,6 +5,8 @@ import com.sun.jdi.event.EventSet
 import kotlin.reflect.KClass
 import com.warmthdawm.zsdebugadapter.event.Event
 import org.eclipse.lsp4j.debug.Breakpoint
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 
 data class VMEventArgs<T : JDIEvent>(val jdiEvent: T, val eventSet: EventSet) {
@@ -24,14 +26,17 @@ private constructor(val jdiEvent: KClass<T>) : Event<VMEventArgs<T>> {
     }
 
     companion object {
-        fun <T : JDIEvent> create(jdiEvent: KClass<T>): VMEvent<T> {
+        fun <T : JDIEvent> create(jdiEvent: KClass<T>): VMEvent<T> = lock.withLock {
             return VMEvent(jdiEvent).also { events.add(it) }
         }
 
+        private val lock = ReentrantLock()
+
         private val events = mutableListOf<VMEvent<*>>()
 
-        fun <T : JDIEvent> findEvent(obj: JDIEvent): VMEvent<T>? =
+        fun <T : JDIEvent> findEvent(obj: JDIEvent): VMEvent<T>? = lock.withLock {
             events.firstOrNull() { it.jdiEvent.isInstance(obj) } as? VMEvent<T>
+        }
 
     }
 }

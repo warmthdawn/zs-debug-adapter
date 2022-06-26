@@ -61,13 +61,12 @@ class JDI2LSPConverter(
             catching("Failed to get method arguments of $frame") {
                 frame.location().method().arguments().forEach { param ->
                     catching("Failed to get value of $param") {
-                        frame.getValue(param)?.let { arguments.add(localVariable(param.name(), it, param.type())) }
+                        frame.getValue(param)?.let { arguments.add(localVariable(param.name(), it)) }
                         parameters.add(param)
 
                     }
                 }
             }
-
 
 
             val locals = mutableListOf<JDIVariable>()
@@ -83,7 +82,7 @@ class JDI2LSPConverter(
                     if(variable !in parameters) {
                         catching("Failed to get value of $variable") {
                             frame.getValue(variable)
-                                ?.let { locals.add(localVariable(variable.name(), it, variable.type())) }
+                                ?.let { locals.add(localVariable(variable.name(), it)) }
                         }
                     }
                 }
@@ -96,7 +95,7 @@ class JDI2LSPConverter(
                 val declaringClazz = frame.location().declaringType()
                 declaringClazz.allFields().forEach { field ->
                     catching("Failed to get value of $field") {
-                        declaringClazz.getValue(field)?.let { fields.add(localVariable(field.name(), it, field.type())) }
+                        declaringClazz.getValue(field)?.let { fields.add(localVariable(field.name(), it)) }
                     }
                 }
             }
@@ -122,9 +121,9 @@ class JDI2LSPConverter(
 
             if (fields.isNotEmpty()) {
                 add(Scope().apply {
-                    name = "Arguments"
-                    presentationHint = ScopePresentationHint.ARGUMENTS
-                    variablesReference = variablesPool.put(VariableScope("Arguments", arguments))
+                    name = "Fields"
+                    presentationHint = "fields"
+                    variablesReference = variablesPool.put(VariableScope("Fields", fields))
                 })
             }
 
